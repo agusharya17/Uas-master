@@ -1,0 +1,50 @@
+version: '3.8'
+services:
+  app:
+    image: riris/uas
+    container_name: php-apache
+    depends_on:
+      - db
+    volumes:
+      - ./php/src:/var/www/html/
+    ports:
+      - 8000:80
+    networks:
+      - backend
+
+  db:
+    container_name: db
+    image: mysql
+    restart: always
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: peminjaman
+      MYSQL_ROOT_PASSWORD: admin
+    volumes:
+      - db:/var/lib/mysql
+      - ./peminjaman.sql:/docker-entrypoint-initdb.d/peminjaman.sql 
+    networks:
+      - backend
+  
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    ports:
+        - '3060:80'
+    restart: always
+    environment:
+        PMA_HOST: db
+    depends_on:
+        - db
+
+volumes:
+    db: 
+
+#Docker Networks
+networks:
+  backend:
+    name: backend-networks
+    ipam: 
+      driver: default
+      config:
+        - subnet: 172.20.0.0/24
